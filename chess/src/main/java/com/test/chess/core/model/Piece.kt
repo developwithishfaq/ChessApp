@@ -1,11 +1,10 @@
-package com.test.chess.model
-
-import com.test.chess.ChessConfigs
+package com.test.chess.core.model
 
 abstract class Piece(
     private val isWhitePiece: Boolean,
     private val name: String
 ) {
+    fun isWhitePiece() = isWhitePiece
 
     fun getName(): String {
         return name
@@ -14,6 +13,6 @@ abstract class Piece(
     abstract fun canMove(
         from: Position,
         to: Position,
-        board: Array<Array<Piece?>>
+        board: List<Array<Piece?>>
     ): Boolean
 }

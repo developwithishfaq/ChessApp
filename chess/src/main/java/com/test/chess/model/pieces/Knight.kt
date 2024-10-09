@@ -1,16 +1,17 @@
 package com.test.chess.model.pieces
 
-import com.test.chess.model.Piece
-import com.test.chess.model.Position
+import com.test.chess.core.model.Piece
+import com.test.chess.core.model.PieceBase
+import com.test.chess.core.model.Position
+import com.test.chess.helpers.GeneralRules.isValidKnightMove
 
 class Knight(isWhitePlayer: Boolean) :
-    Piece(isWhitePlayer, "Knight") {
+    PieceBase(isWhitePlayer, "Knight") {
     override fun canMove(
         from: Position,
         to: Position,
-        board: Array<Array<Piece?>>
+        board: List<Array<Piece?>>
     ): Boolean {
-        // Implement movement logic
-        return true
+        return overAllChecks(from, to, board) && isValidKnightMove(from, to)
     }
 }

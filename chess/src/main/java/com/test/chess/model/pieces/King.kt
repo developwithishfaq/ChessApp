@@ -1,15 +1,20 @@
 package com.test.chess.model.pieces
 
-import com.test.chess.model.Piece
-import com.test.chess.model.Position
+import com.test.chess.core.model.Piece
+import com.test.chess.core.model.PieceBase
+import com.test.chess.core.model.Position
+import com.test.chess.helpers.GeneralRules
 
-class King(isWhitePlayer: Boolean) : Piece(isWhitePlayer, "King") {
+class King(private val isWhitePlayer: Boolean) : PieceBase(isWhitePlayer, "King") {
     override fun canMove(
         from: Position,
         to: Position,
-        board: Array<Array<Piece?>>
+        board: List<Array<Piece?>>
     ): Boolean {
-        // Implement movement logic
-        return true
+        return if (overAllChecks(from, to, board)) {
+            GeneralRules.isKingMove(from, to, board, isWhitePlayer)
+        } else {
+            false
+        }
     }
 }
