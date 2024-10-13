@@ -15,14 +15,27 @@ object PawnHelper {
         from: Position,
         to: Position,
         isWhite: Boolean,
-        board: List<Array<Piece?>>
+        board: List<List<Piece?>>,
+        showLogs: Boolean
     ): Boolean {
-        if (isBackwardMove(from, to) || isSameRowMove(from, to)) {
-            ChessConfigs.logChess("Backward Or Same Row Move", isError = true)
+        if (isBackwardMove(from, to, isWhite) || isSameRowMove(from, to)) {
+            ChessConfigs.logChess(
+                msg = "isBackwardMove=${
+                    isBackwardMove(
+                        from,
+                        to,
+                        isWhite
+                    )
+                },isSameRowMove=${isSameRowMove(from, to)}",
+                enable = showLogs
+            )
             return false
         }
 
-        val rowDistance = getRowDistance(fromRow = from.row, toRow = to.row)
+        val rowDistance = getRowDistance(
+            fromRow = from.row, toRow = to.row,
+            isWhitePlayer = isWhite
+        )
         val allowedDistance = if (isWhite) {
             if (from.row == 1) 2 else 1
         } else {
@@ -30,27 +43,58 @@ object PawnHelper {
         }
 
         if (rowDistance > allowedDistance) {
-            ChessConfigs.logChess("Row Distance Increasing, Distance: $rowDistance, allowed: $allowedDistance", isError = true)
+            ChessConfigs.logChess(
+                msg = "rowDistance > allowedDistance=$rowDistance > $allowedDistance",
+                enable = showLogs
+            )
             return false
         }
 
         val isDiagonal = isDiagonalMove(from, to)
         val isEnemy = isEnemyThere(to)
 
-        return when {
+        val canMove = when {
             isDiagonal && isEnemy -> {
-                ChessConfigs.logChess("isDiagonalMove=$isDiagonal, isEnemyThere=$isEnemy")
+                /*
+                ChessConfigs.logChess(
+                    msg = "isDiagonal && isEnemy,isThatOneAOneMove=${
+                        GeneralRules.isThatOneAOneMove(
+                            from,
+                            to
+                        )
+                    }",
+                    enable = showLogs
+                )*/
+                if (GeneralRules.isThatOneAOneMove(from, to).not()) {
+                    return false
+                }
                 true
             }
+
             !isDiagonal && !isAnyEnemyAhead(from) -> {
-                ChessConfigs.logChess("No enemy ahead and not a diagonal move")
                 true
             }
+
             isAnyEnemyAheadInDiagonal(from) && isEnemy -> {
-                ChessConfigs.logChess("Enemy ahead in diagonal, isEnemyThere=$isEnemy")
+                /*
+                ChessConfigs.logChess(
+                    "isAnyEnemyAheadInDiagonal(from) && isEnemy,isThatOneAOneMove=${
+                        GeneralRules.isThatOneAOneMove(
+                            from = from,
+                            to = to
+                        )
+                    }", showLogs
+                )*/
+                if (GeneralRules.isThatOneAOneMove(from, to).not()) {
+                    return false
+                }
                 true
             }
+
             else -> false
         }
+        if (canMove) {
+        }
+        return canMove
     }
 }

@@ -17,7 +17,7 @@ object GeneralRules {
         return isVerticalMove(from, to) || isHorizontalMove(from, to)
     }
 
-    fun isRookPathClear(from: Position, to: Position, board: List<Array<Piece?>>): Boolean {
+    fun isRookPathClear(from: Position, to: Position, board: List<List<Piece?>>): Boolean {
         return if (isHorizontalMove(from, to)) {
             isPathClearHorizontally(from, to, board)
         } else if (isVerticalMove(from, to)) {
@@ -27,25 +27,25 @@ object GeneralRules {
         }
     }
 
-    fun isQueenPathClear(from: Position, to: Position, board: List<Array<Piece?>>): Boolean {
-        ChessConfigs.logChess("isQueenPathClear from=$from,to=$to")
-        return if (isHorizontalMove(from, to) || isVerticalMove(from, to)) {
+    fun isQueenPathClear(from: Position, to: Position, board: List<List<Piece?>>): Boolean {
+        val clear = if (isHorizontalMove(from, to) || isVerticalMove(from, to)) {
             isRookPathClear(from, to, board)
         } else if (isDiagonalMove(from, to)) {
             isThereAnyOneInDiagonal(from, to, board).not()
         } else {
             false
         }
+        return clear
     }
 
     fun isDiagonalMove(from: Position, to: Position): Boolean {
-        return Math.abs(from.row - to.row) == Math.abs(from.col - to.col)
+        return abs(from.row - to.row) == abs(from.col - to.col)
     }
 
     fun isThereAnyOneInDiagonal(
         from: Position,
         to: Position,
-        board: List<Array<Piece?>>
+        board: List<List<Piece?>>
     ): Boolean {
         return try {
             if (isDiagonalMove(from, to)) {
@@ -72,7 +72,7 @@ object GeneralRules {
     fun isPathClearVertically(
         from: Position,
         to: Position,
-        board: List<Array<Piece?>>
+        board: List<List<Piece?>>
     ): Boolean {
         if (from.col != to.col) return false
         val direction = if (to.row > from.row) 1 else -1
@@ -90,7 +90,7 @@ object GeneralRules {
     fun isPathClearHorizontally(
         from: Position,
         to: Position,
-        board: List<Array<Piece?>>
+        board: List<List<Piece?>>
     ): Boolean {
         if (from.row != to.row) return false
         val direction = if (to.col > from.col) 1 else -1
@@ -141,10 +141,27 @@ object GeneralRules {
         return (rowDiff == 2 && colDiff == 1) || (rowDiff == 1 && colDiff == 2)
     }
 
+    fun isThatOneAOneMove(
+        from: Position,
+        to: Position
+    ): Boolean {
+        val dx = abs(from.row - to.row)
+        val dy = abs(from.col - to.col)
+        return dx <= 1 && dy <= 1
+    }
+
+    fun isInEnemyLine(isWhite: Boolean, position: Position): Boolean {
+        return if (isWhite) {
+            position.row == 7
+        } else {
+            position.row == 0
+        }
+    }
+
     fun isKingMove(
         from: Position,
         to: Position,
-        board: List<Array<Piece?>>,
+        board: List<List<Piece?>>,
         isWhite: Boolean
     ): Boolean {
         val canMove =

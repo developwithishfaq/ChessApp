@@ -100,7 +100,6 @@ fun ChessScreen(
                                 selected = selected,
                                 position = Position(row = row, col = index),
                                 onClick = {
-//                                    findNextMoves(Position(row, col = index), state.board)
                                     viewModel.onEvent(
                                         ChessEvents.SelectPiece(
                                             col = index,

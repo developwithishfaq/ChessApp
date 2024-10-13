@@ -5,8 +5,21 @@ import com.test.chess.core.model.Position
 import com.test.chess.helpers.ChessConfigs.boardState
 import com.test.chess.helpers.ChessConfigs.getPieceAt
 import com.test.chess.helpers.ChessConfigs.isWhitePlayer
+import com.test.chess.model.pieces.King
 
 object ChessExtension {
+
+    fun findKingPosition(isWhite: Boolean, board: List<List<Piece?>>): Position? {
+        for (row in board.indices) {
+            for (col in board[row].indices) {
+                val piece = board[row][col]
+                if (piece is King && piece.isWhitePiece() == isWhite) {
+                    return Position(row, col)
+                }
+            }
+        }
+        return null
+    }
 
 
     fun isAnyEnemyAhead(from: Position): Boolean {
@@ -35,6 +48,7 @@ object ChessExtension {
         val enemy = ChessConfigs.getPieceAt(to.row, to.col)
         return enemy.isEnemyPiece()
     }
+
     fun areAbsoluteValuesEqual(value1: Int, value2: Int): Boolean {
         return Math.abs(value1) == Math.abs(value2)
     }

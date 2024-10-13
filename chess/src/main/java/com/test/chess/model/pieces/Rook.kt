@@ -12,7 +12,8 @@ class Rook(isWhitePlayer: Boolean) : PieceBase(
     override fun canMove(
         from: Position,
         to: Position,
-        board: List<Array<Piece?>>
+        board: List<List<Piece?>>,
+        showLogs: Boolean
     ): Boolean {
         // Implement movement logic
         return if (overAllChecks(from, to, board)) {

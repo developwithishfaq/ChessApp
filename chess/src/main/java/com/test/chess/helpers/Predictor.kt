@@ -2,14 +2,15 @@ package com.test.chess.helpers
 
 import com.test.chess.core.model.Piece
 import com.test.chess.core.model.Position
+import com.test.chess.model.pieces.Pawn
 
+fun List<List<Piece?>>.arrayAbale() = map { it.toMutableList() }.toMutableList()
 object Predictor {
     fun isNextPositionSafe(
         from: Position,
         to: Position,
-        board: List<Array<Piece?>>
+        board: List<List<Piece?>>
     ): List<Position> {
-        ChessConfigs.logChess("Enemy Positions Called")
         val enemyPositions = mutableListOf<Position>()
         // Get the color of the piece moving
         val movingPiece = board[from.row][from.col]
@@ -25,20 +26,30 @@ object Predictor {
                 if (piece != null && piece.isWhitePiece() != isWhitePiece) {
                     // Check if this enemy piece can attack the target position
                     val enemyPosition = Position(row, col)
-                    if (piece.canMove(enemyPosition, to, board)) {
+                    val canMove = if (piece !is Pawn) {
+                        val canMove = piece.canMove(enemyPosition, to, board)
+                        canMove
+                    } else {
+                        val list = board.arrayAbale()
+                        list[to.row][to.col] = movingPiece
+                        val canMove = piece.canMove(enemyPosition, to, list)
+//                        list[to.row][to.col] = null
+                        canMove
+                    }
+                    if (canMove) {
                         enemyPositions.add(enemyPosition)
                     }
                 }
             }
         }
-        ChessConfigs.logChess("Enemy Positions: $enemyPositions")
+//        ChessConfigs.logChess("Enemy Positions: $enemyPositions")
         return enemyPositions
     }
 
 
     fun findNextMoves(
         from: Position,
-        board: List<Array<Piece?>>
+        board: List<List<Piece?>>
     ): List<Position> {
         val piece = board[from.row][from.col]
         val positions = mutableListOf<Position>()
@@ -51,7 +62,6 @@ object Predictor {
                 }
             }
         }
-        ChessConfigs.logChess("Next Moves: $positions")
         return positions
     }
 

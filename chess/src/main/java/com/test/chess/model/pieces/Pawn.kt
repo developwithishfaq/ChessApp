@@ -7,33 +7,46 @@ import com.test.chess.helpers.ChessConfigs
 import com.test.chess.helpers.PawnHelper
 
 class Pawn(private val isWhitePlayer: Boolean) : PieceBase(isWhitePlayer, "Pawn") {
-    override fun canMove(from: Position, to: Position, board: List<Array<Piece?>>): Boolean {
-        if (overAllChecks(from, to, board)) {
-            return PawnHelper.isPawnMove(from, to, isWhitePlayer, board)
+    override fun canMove(
+        from: Position,
+        to: Position,
+        board: List<List<Piece?>>,
+        showLogs: Boolean
+    ): Boolean {
+        logData(showLogs)
+        return if (overAllChecks(from, to, board, showLogs)) {
+            PawnHelper.isPawnMove(
+                from = from,
+                to = to,
+                isWhite = isWhitePlayer,
+                board = board,
+                showLogs = showLogs
+            )
         } else {
-            return false
+            false
         }
     }
+
 }
 
-fun getRowDistance(fromRow: Int, toRow: Int): Int {
-    return if (ChessConfigs.isWhitePlayer()) {
+fun getRowDistance(fromRow: Int, toRow: Int, isWhitePlayer: Boolean): Int {
+    return if (isWhitePlayer) {
         toRow - fromRow
     } else {
         fromRow - toRow
     }
 }
 
-fun getColumnDistance(fromCol: Int, toCol: Int): Int {
-    return if (ChessConfigs.isWhitePlayer()) {
+fun getColumnDistance(fromCol: Int, toCol: Int, isWhitePlayer: Boolean): Int {
+    return if (isWhitePlayer) {
         toCol - fromCol
     } else {
         fromCol - toCol
     }
 }
 
-fun isBackwardMove(from: Position, to: Position): Boolean {
-    return if (ChessConfigs.isWhitePlayer()) {
+fun isBackwardMove(from: Position, to: Position, isWhitePlayer: Boolean): Boolean {
+    return if (isWhitePlayer) {
         to.row < from.row
     } else {
         from.row < to.row

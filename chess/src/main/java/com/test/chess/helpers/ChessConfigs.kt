@@ -58,7 +58,11 @@ object ChessConfigs {
 
         boardState.update {
             it.copy(
-                board = board
+                board = board.map { model ->
+                    model.map { subModel ->
+                        subModel
+                    }
+                }
             )
         }
     }
@@ -69,25 +73,28 @@ object ChessConfigs {
     }
 
     fun movePiece(from: Position, to: Position): Boolean {
-        logChess("--------------Moving Piece-----------------")
-        logChess("From=$from")
-        logChess("To=$to")
-        val board = boardState.value.board.toMutableList()
+        val board = boardState.value.board.arrayAbale()
         val piece = board[from.row][from.col] ?: return false // No piece at the starting position
-        val canMove = piece.canMove(from, to, board)
-        logChess("Name=${piece.getName()}")
-        logChess("Can Move = $canMove", isError = canMove.not())
+        val canMove = piece.canMove(from = from, to = to, board = board, showLogs = true)
+        logChess("Moving Piece:from=$from,to=$to,canMove:$canMove,piece=$piece", true)
         if (canMove) {
             board[to.row][to.col] = piece
             board[from.row][from.col] = null
             boardState.update {
                 it.copy(
                     board = board,
-                    isWhiteTurn = boardState.value.isWhiteTurn.not()
                 )
             }
         }
         return canMove
+    }
+
+    fun changeTurn() {
+        boardState.update {
+            it.copy(
+                isWhiteTurn = boardState.value.isWhiteTurn.not()
+            )
+        }
     }
 
     fun getPieceAt(row: Int, col: Int): Piece? = try {
@@ -96,113 +103,66 @@ object ChessConfigs {
         null
     }
 
-    fun getPiecesArray(): List<Array<Piece?>> {
+    fun getPieceAt(position: Position): Piece? = try {
+        getPieceAt(position.row, position.col)
+    } catch (_: Exception) {
+        null
+    }
+
+    fun getPiecesArray(): List<List<Piece?>> {
         return boardState.value.board
     }
 
 
-    fun logChess(msg: String, tag: String = "chessLogs", isError: Boolean = false) {
-        if (isError) {
-            Log.e(tag, "logChess=$msg")
-        } else {
-            Log.d(tag, "logChess=$msg")
+    fun logChess(
+        msg: String,
+        enable: Boolean = false,
+        tag: String = "chessLogs",
+        isError: Boolean = false
+    ) {
+        if (enable) {
+            if (isError) {
+                Log.e(tag, "logChess=$msg")
+            } else {
+                Log.d(tag, "logChess=$msg")
+            }
         }
     }
 
-    fun selectPiece(row: Int, col: Int) {
-        val piece = getPieceAt(row, col)
-        val pieceAvailable = piece != null
-        if (pieceAvailable) {
-            if (piece?.isWhitePiece() == true && ChessConfigs.isWhitePlayer()) {
-                boardState.update {
-                    it.copy(
-                        selectedPiece = SelectedPiece(
-                            row = row,
-                            col = col
+    fun selectPiece(row: Int, col: Int, isWhite: Boolean) {
+        val piece = getPieceAt(row, col)!!
+        // If they are same
+        if (piece.isWhitePiece() == isWhite) {
+            boardState.update {
+                it.copy(
+                    selectedPiece = SelectedPiece(
+                        row = row,
+                        col = col
+                    )
+                )
+            }
+        } else if (boardState.value.selectedPiece != null) {
+            val selectedPiece = boardState.value.selectedPiece
+            selectedPiece?.let {
+                val from = Position(selectedPiece.row, selectedPiece.col)
+                val to = Position(row, col)
+                val canMove = movePiece(
+                    from = from,
+                    to = to,
+                )
+                if (canMove) {
+                    val eatenPiece = boardState.value.eatenPieces.toMutableList()
+                    eatenPiece.add(
+                        EatenPiece(
+                            row = to.row,
+                            col = to.col,
+                            piece = piece
                         )
                     )
-                }
-            } else if (piece?.isWhitePiece()?.not() == true && ChessConfigs.isWhitePlayer().not()) {
-                boardState.update {
-                    it.copy(
-                        selectedPiece = SelectedPiece(
-                            row = row,
-                            col = col
+                    boardState.update {
+                        it.copy(
+                            eatenPieces = eatenPiece
                         )
-                    )
-                }
-            } else if (boardState.value.selectedPiece != null) {
-                if (ChessConfigs.isWhitePlayer()) {
-                    val selectedPiece = boardState.value.selectedPiece
-                    if (piece?.isWhitePiece()?.not() == true) {
-                        selectedPiece?.let {
-                            val board = boardState.value.board.toMutableList()
-                            val canMove = movePiece(
-                                Position(
-                                    row = selectedPiece.row,
-                                    col = selectedPiece.col
-                                ),
-                                Position(
-                                    row = row,
-                                    col = col
-                                )
-                            )
-                            if (canMove) {
-                                val eatenPiece = boardState.value.eatenPieces.toMutableList()
-                                board[selectedPiece.row][selectedPiece.col] = null
-                                eatenPiece.add(
-                                    EatenPiece(
-                                        selectedPiece.row,
-                                        selectedPiece.col,
-                                        piece
-                                    )
-                                )
-                                ChessConfigs.logChess("White Eaten Black ,Is White=${boardState.value.isWhiteTurn}")
-                                boardState.update {
-                                    it.copy(
-                                        board = board,
-                                        eatenPieces = eatenPiece,
-                                        selectedPiece = null
-                                    )
-                                }
-                            }
-                        }
-                    }
-                } else if (ChessConfigs.isWhitePlayer().not()) {
-                    val selectedPiece = boardState.value.selectedPiece
-                    if (piece?.isWhitePiece() == true) {
-                        selectedPiece?.let {
-                            val board = boardState.value.board.toMutableList()
-                            val eatenPiece = boardState.value.eatenPieces.toMutableList()
-                            val canMove = movePiece(
-                                Position(
-                                    row = selectedPiece.row,
-                                    col = selectedPiece.col
-                                ),
-                                Position(
-                                    row = row,
-                                    col = col
-                                )
-                            )
-                            if (canMove) {
-                                board[selectedPiece.row][selectedPiece.col] = null
-                                eatenPiece.add(
-                                    EatenPiece(
-                                        selectedPiece.row,
-                                        selectedPiece.col,
-                                        piece
-                                    )
-                                )
-                                ChessConfigs.logChess("Black Eaten White ,Is White=${boardState.value.isWhiteTurn}")
-                                boardState.update {
-                                    it.copy(
-                                        board = board,
-                                        eatenPieces = eatenPiece,
-                                        selectedPiece = null
-                                    )
-                                }
-                            }
-                        }
                     }
                 }
             }

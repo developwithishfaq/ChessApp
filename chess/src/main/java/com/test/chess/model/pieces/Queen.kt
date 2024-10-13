@@ -9,7 +9,8 @@ class Queen(isWhitePlayer: Boolean) : PieceBase(isWhitePlayer, "Queen") {
     override fun canMove(
         from: Position,
         to: Position,
-        board: List<Array<Piece?>>
+        board: List<List<Piece?>>,
+        showLogs: Boolean
     ): Boolean {
         return if (overAllChecks(from, to, board)) {
             GeneralRules.isDiagonalMove(from, to) || GeneralRules.isRookMove(

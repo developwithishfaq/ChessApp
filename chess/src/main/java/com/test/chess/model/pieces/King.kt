@@ -9,9 +9,10 @@ class King(private val isWhitePlayer: Boolean) : PieceBase(isWhitePlayer, "King"
     override fun canMove(
         from: Position,
         to: Position,
-        board: List<Array<Piece?>>
+        board: List<List<Piece?>>,
+        showLogs: Boolean
     ): Boolean {
-        return if (overAllChecks(from, to, board)) {
+        return if (overAllChecks(from, to, board,showLogs)) {
             GeneralRules.isKingMove(from, to, board, isWhitePlayer)
         } else {
             false

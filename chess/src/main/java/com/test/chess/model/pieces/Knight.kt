@@ -10,7 +10,8 @@ class Knight(isWhitePlayer: Boolean) :
     override fun canMove(
         from: Position,
         to: Position,
-        board: List<Array<Piece?>>
+        board: List<List<Piece?>>,
+        showLogs: Boolean
     ): Boolean {
         return overAllChecks(from, to, board) && isValidKnightMove(from, to)
     }
